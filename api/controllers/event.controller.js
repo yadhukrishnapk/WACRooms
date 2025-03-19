@@ -33,7 +33,9 @@ export const createEvent = async (req, res, next) => {
 export const getEvents = async (req, res, next) => {
   try {
     const room = req.params.room;
-    const events = await Event.find({ room });
+    const events = await Event.find({ room })
+      .populate('userId', 'name email') 
+      .lean();
     res.status(200).json({
       success: true,
       events

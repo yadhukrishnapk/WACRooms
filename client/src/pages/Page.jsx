@@ -6,15 +6,15 @@ const MainPage = () => {
   const rooms = [
     {
       label: "Abin's Room",
-      path: "/room1",
+      path: "/room/room1",
     },
     {
       label: "Jilu's Room",
-      path: "/room2",
+      path: "/room/room2",
     },
     {
       label: "TV Room",
-      path: "/room3",
+      path: "/room/room3",
     }
   ];
 
