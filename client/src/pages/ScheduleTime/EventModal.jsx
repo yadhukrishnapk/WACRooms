@@ -1,38 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import moment from "moment";
-import axios from "axios";
+import { post } from "../../apiServices/apiServices";
 
 const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, userId }) => {
-  const defaultStart = moment(initialStart).set({
-    hour: moment().hour(),
-    minute: moment().minute(),
-  });
-
-  const defaultEnd = moment(defaultStart).add(1, "hour");
-
   const [formData, setFormData] = useState({
     title: "",
     category: "default",
     start: moment(initialStart).format("YYYY-MM-DDTHH:mm"),
-    end: moment(initialEnd).format("YYYY-MM-DDTHH:mm"),
+    end: moment(initialEnd).format("YYYY-MM-DDTHH:mm"), 
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const updatedStart = moment(initialStart).set({
-      hour: moment().hour(),
-      minute: moment().minute(),
-    });
-    const updatedEnd = moment(updatedStart).add(1, "hour");
-
     setFormData({
       ...formData,
-      start: updatedStart.format("YYYY-MM-DDTHH:mm"),
-      end: updatedEnd.format("YYYY-MM-DDTHH:mm"),
+      start: moment(initialStart).format("YYYY-MM-DDTHH:mm"),
+      end: moment(initialEnd).format("YYYY-MM-DDTHH:mm"),
     });
-  }, [initialStart]);
+  }, [initialStart, initialEnd]);
 
   if (!isOpen) return null;
 
@@ -40,7 +27,7 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     const eventData = {
       title: formData.title,
       start: new Date(formData.start),
@@ -49,16 +36,13 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
       room: room,
       userId: userId
     };
-
+  
     try {
-      const response = await axios.post('http://localhost:3000/api/event/create', eventData, {
-        withCredentials: true // Include credentials for authentication
-      });
-
-      // Call onSave with the response data from backend
+      const response = await post("/event/create", eventData);
+  
       onSave({
         ...eventData,
-        id: response.data.event._id // Include the ID from the backend
+        id: response.event._id 
       });
       onClose();
     } catch (err) {
@@ -67,6 +51,7 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
       setLoading(false);
     }
   };
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

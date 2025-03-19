@@ -1,19 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import useCalendar from "../../hooks/useCalender";
 import CustomToolbar from "./CustomToolbar";
 import { injectCalendarStyles, eventStyleGetter, dayPropGetter } from "./calendarStyles";
-import { initialEvents } from "./eventsData";
 import EventModal from "./EventModal";
 import { useParams } from "react-router-dom"
 import { useAuth } from "../../hooks/useAuth";
+import LoadingCalendar from "../../Shimmers/LoadingCalender";
 
 const localizer = momentLocalizer(moment);
 const ScheduleTime = () => {
     const {room} = useParams();
 const { user } = useAuth();
+const [loading, setLoading] = useState(true);
   const {
     events,
     view,
@@ -28,8 +29,9 @@ const { user } = useAuth();
     goToPrevious,
     goToNext,
     openModal,
-    closeModal
-  } = useCalendar(initialEvents,room);
+    closeModal,
+    isLoading 
+  } = useCalendar([], room, setLoading);
 
 
   console.log("user:-", user);
@@ -37,6 +39,10 @@ const { user } = useAuth();
   useEffect(() => {
     return injectCalendarStyles();
   }, []);
+
+  if (loading) {
+    return <LoadingCalendar />;
+  }
 
   return (
     <div className="bg-white border border-black">
