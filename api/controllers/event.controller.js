@@ -60,3 +60,44 @@ export const getEvents = async (req, res, next) => {
     next(errorHandler(500, "Error fetching events"));
   }
 };
+
+export const deleteEvent = async (req, res, next) => {
+  console.log("delete event");
+  
+  try {
+    const eventId = req.params.id;
+    const event = await Event.findById(eventId);
+
+    if (!event) {
+      return next(errorHandler(404, "Event not found"));
+    }
+
+    await event.deleteOne();
+    res.status(200).json({ success: true, message: "Event deleted successfully" });
+  } catch (error) {
+    next(errorHandler(500, "Error deleting event"));
+  }
+};
+
+export const updateEvent = async (req, res, next) => {
+  console.log("update event");
+  
+  try {
+    const eventId = req.params.id;
+    const updateData = req.body;
+
+    const event = await Event.findByIdAndUpdate(eventId, updateData, { new: true });
+
+    if (!event) {
+      return next(errorHandler(404, "Event not found"));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Event updated successfully",
+      event,
+    });
+  } catch (error) {
+    next(errorHandler(500, "Error updating event"));
+  }
+};

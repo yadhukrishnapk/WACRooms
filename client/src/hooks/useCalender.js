@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import moment from "moment";
-import { get } from "../apiServices/apiServices";
+import { get,del } from "../apiServices/apiServices";
 
 const useCalendar = (initialEvents = [], room, setParentLoading = null, showAlert = null) => {
   const [events, setEvents] = useState(initialEvents);
@@ -96,6 +96,25 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null, showAler
       }
     }
   };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!eventId) {
+      console.error("Event ID is missing.");
+      return;
+    }
+    
+    try {
+      console.log(`Sending DELETE request to /event/${eventId}`);
+      const response = await del(`/event/${eventId}`);
+      console.log("Delete Response:", response);
+      setEvents((prev) => prev.filter((event) => event.id !== eventId));
+      if (showAlert) showAlert("Success", "Event deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting event:", error.response?.data || error.message);
+      if (showAlert) showAlert("Error", "Failed to delete event.");
+    }
+  };
+  
   
   const handleSaveEvent = async (eventData) => {
     setIsLoading(true);
@@ -159,6 +178,7 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null, showAler
     date,
     isModalOpen,
     selectedSlot,
+    handleDeleteEvent,
     handleNavigate,
     handleViewChange,
     handleSelect,
@@ -168,6 +188,7 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null, showAler
     goToNext,
     openModal,
     closeModal,
+    fetchEvents,
     isLoading
   };
 };

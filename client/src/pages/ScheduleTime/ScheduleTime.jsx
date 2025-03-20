@@ -14,6 +14,7 @@ import CustomAlert from "../../componets/customComponets/Alert";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import LoadingCalendar from "../../Shimmers/LoadingCalender";
+import EventDetailModal from "../../componets/customComponets/EventDetailModal";
 
 const localizer = momentLocalizer(moment);
 
@@ -26,6 +27,9 @@ const ScheduleTime = () => {
     title: "",
     message: "",
   });
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const showAlert = (title, message) => {
     setAlertConfig({
@@ -48,6 +52,7 @@ const ScheduleTime = () => {
     date,
     isModalOpen,
     selectedSlot,
+    handleDeleteEvent,
     handleNavigate,
     handleViewChange,
     handleSelect,
@@ -57,12 +62,33 @@ const ScheduleTime = () => {
     goToNext,
     openModal,
     closeModal,
+    fetchEvents,
     isLoading,
   } = useCalendar([], room, setLoading, showAlert);
 
   useEffect(() => {
     return injectCalendarStyles();
   }, []);
+
+  const handleEditEvent = (event) => {
+    setDetailModalOpen(false); // Close the detail modal
+    setEditingEvent(event); // Store the event being edited
+    openModal();
+  };
+
+  const handleDelete = async (eventId) => {
+    try {
+      await handleDeleteEvent(eventId); // Wait for deletion to complete
+      setDetailModalOpen(false);
+      setLoading(true); // Show loading state while refreshing
+      await fetchEvents(); // Refresh the events
+      showAlert("Success", "Event deleted successfully");
+    } catch (error) {
+      showAlert("Error", "Failed to delete event");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <LoadingCalendar />;
@@ -78,12 +104,8 @@ const ScheduleTime = () => {
         selectable
         onSelectSlot={handleSelect}
         onSelectEvent={(event) => {
-          showAlert(
-            event.title,
-            `Category: ${event.category || "N/A"}\nStart: ${moment(
-              event.start
-            ).format("LLL")}\nEnd: ${moment(event.end).format("LLL")}`
-          );
+          setSelectedEvent(event);
+          setDetailModalOpen(true);
         }}
         view={view}
         onView={handleViewChange}
@@ -109,12 +131,24 @@ const ScheduleTime = () => {
       />
       <EventModal
         isOpen={isModalOpen}
-        onClose={closeModal}
+        onClose={() => {
+          closeModal();
+          setEditingEvent(null); // Reset editing state when closing modal
+        }}
         onSave={handleSaveEvent}
-        initialStart={selectedSlot?.start || new Date()}
-        initialEnd={selectedSlot?.end || new Date()}
+        initialStart={editingEvent?.start || selectedSlot?.start || new Date()}
+        initialEnd={editingEvent?.end || selectedSlot?.end || new Date()}
         room={room}
         userId={user?.id}
+        editingEvent={editingEvent} // Pass editing event
+      />
+
+      <EventDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        event={selectedEvent}
+        onDelete={handleDelete}
+        onEdit={handleEditEvent}
       />
       <CustomAlert
         isOpen={alertConfig.isOpen}

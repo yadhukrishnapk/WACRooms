@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import moment from "moment";
 import { post } from "../../apiServices/apiServices";
 
-const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, userId }) => {
+const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, userId,editingEvent }) => {
   const [formData, setFormData] = useState({
     title: "",
     category: "default",
@@ -14,12 +14,22 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setFormData({
-      ...formData,
-      start: moment(initialStart).format("YYYY-MM-DDTHH:mm"),
-      end: moment(initialEnd).format("YYYY-MM-DDTHH:mm"),
-    });
-  }, [initialStart, initialEnd]);
+    if (editingEvent) {
+      setFormData({
+        title: editingEvent.title || "",
+        category: editingEvent.category || "default",
+        start: moment(editingEvent.start).format("YYYY-MM-DDTHH:mm"),
+        end: moment(editingEvent.end).format("YYYY-MM-DDTHH:mm"),
+      });
+    } else {
+      setFormData({
+        title: "",
+        category: "default",
+        start: moment(initialStart).format("YYYY-MM-DDTHH:mm"),
+        end: moment(initialEnd).format("YYYY-MM-DDTHH:mm"),
+      });
+    }
+  }, [editingEvent, initialStart, initialEnd]);
 
   if (!isOpen) return null;
 
@@ -33,17 +43,20 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
       start: new Date(formData.start),
       end: new Date(formData.end),
       category: formData.category,
-      room: room,
-      userId: userId
+      room,
+      userId,
     };
   
     try {
-      const response = await post("/event/create", eventData);
-  
-      onSave({
-        ...eventData,
-        id: response.event._id 
-      });
+      if (editingEvent) {
+        // Update event
+        await post(`/event/update/${editingEvent._id}`, eventData);
+        onSave({ ...editingEvent, ...eventData }); // Update state
+      } else {
+        // Create new event
+        const response = await post("/event/create", eventData);
+        onSave({ ...eventData, id: response.event._id });
+      }
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save event");
@@ -51,6 +64,7 @@ const EventModal = ({ isOpen, onClose, onSave, initialStart, initialEnd, room, u
       setLoading(false);
     }
   };
+  
   
 
   const handleChange = (e) => {

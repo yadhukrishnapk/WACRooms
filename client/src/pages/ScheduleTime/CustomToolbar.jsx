@@ -16,6 +16,15 @@ const CustomToolbar = ({
   handleViewChange, 
   openModal 
 }) => {
+  const handleScheduleClick = () => {
+    const now = new Date();
+    const oneHourLater = moment(now).add(1, 'hour').toDate();
+    openModal({
+      start: now,
+      end: oneHourLater
+    });
+  };
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center p-6 bg-white border-b border-black">
       <div className="flex items-center mb-4 sm:mb-0">
@@ -67,7 +76,7 @@ const CustomToolbar = ({
         </div>
 
         <button 
-          onClick={openModal}
+          onClick={handleScheduleClick}
           className="flex items-center px-4 py-2 bg-black text-white hover:bg-gray-800 transition-colors"
         >
           <Plus className="w-4 h-4 mr-1" />
