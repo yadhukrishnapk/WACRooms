@@ -5,7 +5,7 @@ import { get,del } from "../apiServices/apiServices";
 const useCalendar = (initialEvents = [], room, setParentLoading = null, showAlert = null) => {
   const [events, setEvents] = useState(initialEvents);
   const [view, setView] = useState("month");
-  const [date, setDate] = useState(new Date(2025, 2, 14));
+  const [date, setDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

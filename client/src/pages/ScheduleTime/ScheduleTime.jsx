@@ -90,6 +90,11 @@ const ScheduleTime = () => {
     }
   };
 
+  const currentTime = moment().startOf("hour").toDate();
+  const startOfDay = moment().startOf("day").toDate();
+  const isToday = moment(date).isSame(new Date(), "day");
+  const minTime = isToday && (view === "day" || view === "week") ? currentTime : startOfDay;
+
   if (loading) {
     return <LoadingCalendar />;
   }
@@ -128,6 +133,7 @@ const ScheduleTime = () => {
         eventPropGetter={eventStyleGetter}
         dayPropGetter={dayPropGetter}
         className="min-h-screen"
+        min={minTime}
       />
       <EventModal
         isOpen={isModalOpen}
