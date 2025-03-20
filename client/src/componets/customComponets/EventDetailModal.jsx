@@ -1,14 +1,29 @@
-// EventDetailModal.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import { useAuth } from '../../hooks/useAuth';
 
 const EventDetailModal = ({ 
   isOpen, 
   onClose, 
   event, 
   onDelete, 
-  onEdit 
+  onEdit,
 }) => {
+  const { user } = useAuth(); 
+  const [isCreator, setIsCreator] = useState(false); 
+
+  useEffect(() => {
+    if (isOpen && event && user) {
+      const eventCreatorId = event.userId?._id; 
+      const loggedInUserId = user.id; 
+      console.log("Event Creator userId:", eventCreatorId);
+      console.log("Logged-in userId:", loggedInUserId);
+      console.log("Is current user the creator?", eventCreatorId === loggedInUserId);
+
+      setIsCreator(eventCreatorId === loggedInUserId);
+    }
+  }, [isOpen, event, user]); 
+
   if (!isOpen || !event) return null;
 
   return (
@@ -35,21 +50,24 @@ const EventDetailModal = ({
           <p><strong>Category:</strong> {event.category || 'N/A'}</p>
           <p><strong>Start:</strong> {moment(event.start).format('LLL')}</p>
           <p><strong>End:</strong> {moment(event.end).format('LLL')}</p>
+          <p><strong>Created By:</strong> {event.userId?.name || 'Unknown'}</p>
         </div>
-        <div className="mt-6 flex justify-end space-x-2">
-          <button
-            onClick={() => onEdit(event)}
-            className="px-4 py-2 border border-black hover:bg-gray-100"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(event._id)}
-            className="px-4 py-2 border border-black bg-red-500 text-white hover:bg-red-600"
-          >
-            Delete
-          </button>
-        </div>
+        {isCreator && (
+          <div className="mt-6 flex justify-end space-x-2">
+            <button
+              onClick={() => onEdit(event)}
+              className="px-4 py-2 border border-black hover:bg-gray-100"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(event._id)}
+              className="px-4 py-2 border border-black bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

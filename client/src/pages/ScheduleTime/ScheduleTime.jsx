@@ -156,6 +156,7 @@ const ScheduleTime = () => {
         event={selectedEvent}
         onDelete={handleDelete}
         onEdit={handleEditEvent}
+        userId={user?.id}
       />
       <CustomAlert
         isOpen={alertConfig.isOpen}
