@@ -8,7 +8,7 @@ export const createEvent = async (req, res, next) => {
     const { title, start, end, category, room, userId } = req.body;
     if (!userId) {
         return next(errorHandler(400, "User ID is required"));
-      }
+    }
 
     const newEvent = new Event({
       title,
@@ -16,7 +16,8 @@ export const createEvent = async (req, res, next) => {
       end,
       category,
       userId,
-      room
+      room,
+      isEnded: false
     });
 
     await newEvent.save();
@@ -33,9 +34,24 @@ export const createEvent = async (req, res, next) => {
 export const getEvents = async (req, res, next) => {
   try {
     const room = req.params.room;
-    const events = await Event.find({ room })
-      .populate('userId', 'name email') 
-      .lean();
+    const currentTime = new Date();
+    
+    await Event.updateMany(
+      { 
+        room, 
+        end: { $lte: currentTime }, 
+        isEnded: false 
+      },
+      { 
+        $set: { isEnded: true } 
+      }
+    );
+    
+    const events = await Event.find({ 
+      room, 
+      isEnded: false 
+    }).populate("userId", "name email avatar"); 
+
     res.status(200).json({
       success: true,
       events

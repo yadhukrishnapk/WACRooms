@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import moment from "moment";
 import { get } from "../apiServices/apiServices";
-const useCalendar = (initialEvents = [], room, setParentLoading = null) => {
+
+const useCalendar = (initialEvents = [], room, setParentLoading = null, showAlert = null) => {
   const [events, setEvents] = useState(initialEvents);
   const [view, setView] = useState("month");
   const [date, setDate] = useState(new Date(2025, 2, 14));
@@ -22,11 +23,15 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null) => {
 
       const response = await get(`/event/room/${room}`);
 
-      const formattedEvents = response.events.map(event => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end)
-      }));
+      // Filter out any ended events (this is a safety measure - the backend should already filter them)
+      const currentTime = new Date();
+      const formattedEvents = response.events
+        .filter(event => !event.isEnded && new Date(event.end) > currentTime)
+        .map(event => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end)
+        }));
 
       setEvents(formattedEvents);
     } catch (error) {
@@ -37,8 +42,17 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null) => {
     }
   };
 
+  // Set up periodic refresh to check for ended events
   useEffect(() => {
     fetchEvents();
+    
+    // Check for ended events every minute
+    const intervalId = setInterval(() => {
+      // This will automatically mark events as ended when their time is up
+      fetchEvents();
+    }, 60000);
+
+    return () => clearInterval(intervalId);
   }, [room]);
 
   const handleNavigate = useCallback((newDate) => {
@@ -46,14 +60,43 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null) => {
   }, []);
 
   const handleViewChange = useCallback((newView) => {
+    // Set view to the requested view
     setView(newView);
+    
+    // When changing views, adjust the date to show current day/week/month as appropriate
+    const today = new Date();
+    
+    if (newView === "day") {
+      // For day view, always show today
+      setDate(today);
+    } else if (newView === "week") {
+      // For week view, show the current week
+      setDate(today);
+    }
+    // For month view, we can just keep the current selected month
+    
   }, []);
 
   const handleSelect = ({ start, end }) => {
-    setSelectedSlot({ start, end });
-    setIsModalOpen(true);
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+  
+    const selectedDate = new Date(start);
+    selectedDate.setHours(0, 0, 0, 0); // Normalize to midnight
+  
+    if (selectedDate >= currentDate) {
+      setSelectedSlot({ start, end });
+      setIsModalOpen(true);
+    } else {
+      // Use the custom alert if provided, otherwise fall back to default alert
+      if (showAlert) {
+        showAlert("Scheduling Error", "Cannot schedule events for past dates!");
+      } else {
+        alert("Cannot schedule events for past dates!");
+      }
+    }
   };
-
+  
   const handleSaveEvent = async (eventData) => {
     setIsLoading(true);
     if (setParentLoading) setParentLoading(true);
@@ -63,7 +106,8 @@ const useCalendar = (initialEvents = [], room, setParentLoading = null) => {
         ...prev,
         {
           id: eventData.id || prev.length + 1,
-          ...eventData
+          ...eventData,
+          isEnded: false
         },
       ]);
 

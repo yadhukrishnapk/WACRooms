@@ -1,4 +1,3 @@
-// backend/models/event.model.js
 import mongoose from "mongoose";
 
 const eventSchema = new mongoose.Schema({
@@ -26,6 +25,9 @@ const eventSchema = new mongoose.Schema({
   room: {
     type: String,
     required: true
+  }, isEnded: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

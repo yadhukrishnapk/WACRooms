@@ -4,17 +4,44 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import useCalendar from "../../hooks/useCalender";
 import CustomToolbar from "./CustomToolbar";
-import { injectCalendarStyles, eventStyleGetter, dayPropGetter } from "./calendarStyles";
+import {
+  injectCalendarStyles,
+  eventStyleGetter,
+  dayPropGetter,
+} from "./calendarStyles";
 import EventModal from "./EventModal";
-import { useParams } from "react-router-dom"
+import CustomAlert from "../../componets/customComponets/Alert";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import LoadingCalendar from "../../Shimmers/LoadingCalender";
 
 const localizer = momentLocalizer(moment);
+
 const ScheduleTime = () => {
-    const {room} = useParams();
-const { user } = useAuth();
-const [loading, setLoading] = useState(true);
+  const { room } = useParams();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({
+      isOpen: true,
+      title,
+      message,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertConfig((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+  };
+
   const {
     events,
     view,
@@ -30,12 +57,9 @@ const [loading, setLoading] = useState(true);
     goToNext,
     openModal,
     closeModal,
-    isLoading 
-  } = useCalendar([], room, setLoading);
+    isLoading,
+  } = useCalendar([], room, setLoading, showAlert);
 
-
-  console.log("user:-", user);
-  
   useEffect(() => {
     return injectCalendarStyles();
   }, []);
@@ -53,14 +77,19 @@ const [loading, setLoading] = useState(true);
         endAccessor="end"
         selectable
         onSelectSlot={handleSelect}
-        onSelectEvent={(event) =>
-          alert(`${event.title}\nCategory: ${event.category}`)
-        }
+        onSelectEvent={(event) => {
+          showAlert(
+            event.title,
+            `Category: ${event.category || "N/A"}\nStart: ${moment(
+              event.start
+            ).format("LLL")}\nEnd: ${moment(event.end).format("LLL")}`
+          );
+        }}
         view={view}
         onView={handleViewChange}
         date={date}
         onNavigate={handleNavigate}
-        components={{ 
+        components={{
           toolbar: (toolbarProps) => (
             <CustomToolbar
               {...toolbarProps}
@@ -72,7 +101,7 @@ const [loading, setLoading] = useState(true);
               handleViewChange={handleViewChange}
               openModal={openModal}
             />
-          )
+          ),
         }}
         eventPropGetter={eventStyleGetter}
         dayPropGetter={dayPropGetter}
@@ -86,6 +115,12 @@ const [loading, setLoading] = useState(true);
         initialEnd={selectedSlot?.end || new Date()}
         room={room}
         userId={user?.id}
+      />
+      <CustomAlert
+        isOpen={alertConfig.isOpen}
+        onClose={closeAlert}
+        title={alertConfig.title}
+        message={alertConfig.message}
       />
     </div>
   );

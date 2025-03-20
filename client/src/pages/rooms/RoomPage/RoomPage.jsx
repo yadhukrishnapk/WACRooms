@@ -34,8 +34,6 @@ const roomConfigs = {
 
 const RoomPage = () => {
   const { roomId } = useParams();
-
-  // Get room configuration or use defaults if not found
   const roomConfig = roomConfigs[roomId] || {
     name: `Room ${roomId}`,
     description: "Book this room for your meetings.",
