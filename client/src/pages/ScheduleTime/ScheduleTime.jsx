@@ -71,17 +71,17 @@ const ScheduleTime = () => {
   }, []);
 
   const handleEditEvent = (event) => {
-    setDetailModalOpen(false); // Close the detail modal
-    setEditingEvent(event); // Store the event being edited
+    setDetailModalOpen(false); 
+    setEditingEvent(event);
     openModal();
   };
 
   const handleDelete = async (eventId) => {
     try {
-      await handleDeleteEvent(eventId); // Wait for deletion to complete
+      await handleDeleteEvent(eventId); 
       setDetailModalOpen(false);
-      setLoading(true); // Show loading state while refreshing
-      await fetchEvents(); // Refresh the events
+      setLoading(true);
+      await fetchEvents(); 
       showAlert("Success", "Event deleted successfully");
     } catch (error) {
       showAlert("Error", "Failed to delete event");
@@ -133,14 +133,15 @@ const ScheduleTime = () => {
         isOpen={isModalOpen}
         onClose={() => {
           closeModal();
-          setEditingEvent(null); // Reset editing state when closing modal
+          setEditingEvent(null); 
         }}
         onSave={handleSaveEvent}
         initialStart={editingEvent?.start || selectedSlot?.start || new Date()}
         initialEnd={editingEvent?.end || selectedSlot?.end || new Date()}
         room={room}
         userId={user?.id}
-        editingEvent={editingEvent} // Pass editing event
+        editingEvent={editingEvent} 
+        events={events}
       />
 
       <EventDetailModal
