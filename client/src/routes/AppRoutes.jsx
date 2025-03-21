@@ -7,6 +7,7 @@ import Register from '../pages/register/Register';
 import ScheduleTime from '../pages/ScheduleTime/ScheduleTime';
 import RoomPage from '../pages/rooms/RoomPage/RoomPage';
 import EventListHome from '../pages/EventsList/EventListHome';
+import Profile from '../pages/profile/Profile';
 
 const AppRoutes = () => {
   return (
@@ -16,6 +17,7 @@ const AppRoutes = () => {
       <Route path="/room/:roomId" element={<PrivateRoute><RoomPage /></PrivateRoute>} />
       <Route path="/:room/createSchedule" element={<PrivateRoute><ScheduleTime /></PrivateRoute>} />
       <Route path='/eventsList' element={<PrivateRoute><EventListHome /></PrivateRoute>} />
+      <Route path="*" element={<PrivateRoute><Profile /></PrivateRoute>} />
       
       {/* Public Routes */}
       <Route path="/signin" element={<Signin />} />

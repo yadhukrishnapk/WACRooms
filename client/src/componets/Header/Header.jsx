@@ -26,6 +26,7 @@ export default function Header() {
   }
 
   const handleSignOut = () => {
+    setDropdownOpen(false);
     logout(null);
     navigate('/signin');
     document.removeEventListener('mousedown', handleClickOutside);
