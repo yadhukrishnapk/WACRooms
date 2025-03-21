@@ -1,38 +1,34 @@
-import { useState, useEffect } from "react";
-import { get } from "../apiServices/apiServices";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
+import { get } from "../apiServices/apiServices";
 import { formatEvents } from "../utils/calendarUtils";
 
+const fetcher = async (url) => {
+  const data = await get(url);
+  return data;
+};
+
 /**
- * Custom hook for managing room calendar functionality
+ * Custom hook for managing room calendar functionality with SWR
  * @param {string} roomId - The room identifier (e.g., "room1", "room2")
  * @returns {Object} Calendar state and handlers
  */
 const useRoomCalendar = (roomId) => {
-  const [events, setEvents] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [view, setView] = useState("month");
   const [showModal, setShowModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Fetch events when component mounts
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const data = await get(`/event/room/${roomId}`);
-        const formattedEvents = formatEvents(data.events);
-        setEvents(formattedEvents);
-      } catch (error) {
-        console.error(`Error fetching events for ${roomId}:`, error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvents();
-  }, [roomId]);
+  const { data, error, mutate } = useSWR(`/event/room/${roomId}`, fetcher, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000, 
+  });
+
+  const events = data ? formatEvents(data.events) : [];
+  const loading = !data && !error;
 
   const handleSelectSlot = ({ start, end }) => {
     setSelectedSlot({ start, end });
@@ -63,6 +59,10 @@ const useRoomCalendar = (roomId) => {
     setSelectedEvent(null);
   };
 
+  const refreshEvents = () => {
+    mutate();
+  };
+
   return {
     events,
     selectedSlot,
@@ -70,12 +70,14 @@ const useRoomCalendar = (roomId) => {
     showModal,
     selectedEvent,
     loading,
+    error,
     handleSelectSlot,
     handleSelectEvent,
     handleViewChange,
     handleScheduleClick,
     handleBack,
-    closeModal
+    closeModal,
+    refreshEvents
   };
 };
 

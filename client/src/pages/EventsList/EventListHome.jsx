@@ -85,7 +85,7 @@ const EventListHome = () => {
       </main>
       
       <footer className="w-full py-4 px-8 text-center text-gray-500 text-sm border-t border-gray-200 bg-white">
-        <p>© 2025 Event Manager</p>
+        <p>© 2025 Events of WACRooms</p>
       </footer>
     </div>
   );

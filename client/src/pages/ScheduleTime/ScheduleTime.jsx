@@ -71,17 +71,17 @@ const ScheduleTime = () => {
   }, []);
 
   const handleEditEvent = (event) => {
-    setDetailModalOpen(false); 
+    setDetailModalOpen(false);
     setEditingEvent(event);
     openModal();
   };
 
   const handleDelete = async (eventId) => {
     try {
-      await handleDeleteEvent(eventId); 
+      await handleDeleteEvent(eventId);
       setDetailModalOpen(false);
       setLoading(true);
-      await fetchEvents(); 
+      await fetchEvents();
       showAlert("Success", "Event deleted successfully");
     } catch (error) {
       showAlert("Error", "Failed to delete event");
@@ -93,7 +93,8 @@ const ScheduleTime = () => {
   const currentTime = moment().startOf("hour").toDate();
   const startOfDay = moment().startOf("day").toDate();
   const isToday = moment(date).isSame(new Date(), "day");
-  const minTime = isToday && (view === "day" || view === "week") ? currentTime : startOfDay;
+  const minTime =
+    isToday && (view === "day" || view === "week") ? currentTime : startOfDay;
 
   if (loading) {
     return <LoadingCalendar />;
@@ -139,14 +140,14 @@ const ScheduleTime = () => {
         isOpen={isModalOpen}
         onClose={() => {
           closeModal();
-          setEditingEvent(null); 
+          setEditingEvent(null);
         }}
         onSave={handleSaveEvent}
         initialStart={editingEvent?.start || selectedSlot?.start || new Date()}
         initialEnd={editingEvent?.end || selectedSlot?.end || new Date()}
         room={room}
         userId={user?.id}
-        editingEvent={editingEvent} 
+        editingEvent={editingEvent}
         events={events}
       />
 
