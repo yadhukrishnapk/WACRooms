@@ -101,3 +101,45 @@ export const updateEvent = async (req, res, next) => {
     next(errorHandler(500, "Error updating event"));
   }
 };
+
+
+export const getAllEvents = async (req, res, next) => {
+  try {
+    const { room, limit = 8, skip = 0 } = req.query; 
+    const query = room ? { room } : {}; 
+
+    const events = await Event.aggregate([
+      { $match: query }, 
+      { $sort: { createdAt: -1 } },
+      { 
+        $project: {
+          _id: 1,
+          title: 1,
+          start: 1,
+          end: 1,
+          category: 1,
+          room: 1,
+          isEnded: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "user._id": 1,
+          "user.name": 1,
+          "user.email": 1,
+          "user.avatar": 1,
+        }
+      },
+      { $skip: parseInt(skip) },
+      { $limit: parseInt(limit) }, 
+    ]);
+
+    const totalEvents = await Event.countDocuments(query); 
+
+    res.status(200).json({
+      success: true,
+      events,
+      total: totalEvents, 
+    });
+  } catch (error) {
+    next(errorHandler(500, "Error fetching events"));
+  }
+};

@@ -50,7 +50,7 @@ export default function Header() {
                 Home
               </li>
             </Link>
-            <Link to="/events">
+            <Link to="/eventsList">
               <li className="hidden sm:inline text-gray-800 hover:text-black font-medium transition-colors text-sm uppercase tracking-wide">
                 Events
               </li>

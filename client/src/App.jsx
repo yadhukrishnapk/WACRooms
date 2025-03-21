@@ -9,6 +9,7 @@ import Header from './componets/Header/Header';
 import PrivateRoute from './routes/PrivateRoute';
 import ScheduleTime from './pages/ScheduleTime/ScheduleTime';
 import RoomPage from './pages/rooms/RoomPage/RoomPage';
+import EventListHome from './pages/EventsList/EventListHome';
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
           <Route path="/" element={<PrivateRoute><MainPage /></PrivateRoute>} />
           <Route path="/room/:roomId" element={<PrivateRoute><RoomPage /></PrivateRoute>} />
           <Route path="/:room/createSchedule" element={<PrivateRoute><ScheduleTime /></PrivateRoute>} />
+          <Route path='/eventsList' element={<PrivateRoute><EventListHome/></PrivateRoute>}/>
           <Route path="/signin" element={<Signin />} />
           <Route path="/register" element={<Register />} />
         </Routes>
