@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Calendar, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format } from "date-fns";
@@ -53,6 +53,25 @@ const RoomPage = () => {
     handleBack,
     closeModal,
   } = useRoomCalendar(roomId);
+  const [date, setDate] = useState(new Date());
+
+  const handleNavigate = (action) => {
+    let newDate = new Date(date);
+    switch (action) {
+      case "PREV":
+        newDate.setMonth(date.getMonth() - 1);
+        break;
+      case "NEXT":
+        newDate.setMonth(date.getMonth() + 1);
+        break;
+      case "TODAY":
+        newDate = new Date();
+        break;
+      default:
+        break;
+    }
+    setDate(newDate);
+  };
 
   return (
     <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4">
@@ -83,8 +102,16 @@ const RoomPage = () => {
                 style={{ height: "100%" }}
                 eventPropGetter={eventStyleGetter}
                 components={{
-                  toolbar: (props) => <CustomToolbar {...props} view={view} />,
+                  toolbar: (props) => (
+                    <CustomToolbar
+                      {...props}
+                      view={view}
+                      onNavigate={handleNavigate}
+                    />
+                  ),
                 }}
+                date={date}
+                onNavigate={handleNavigate}
                 dayPropGetter={getDayPropGetter(selectedSlot)}
                 popup
                 showMultiDayTimes
