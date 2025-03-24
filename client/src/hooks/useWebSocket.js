@@ -4,11 +4,12 @@ import { useAuth } from "./useAuth";
 const useWebSocket = () => {
   const [notifications, setNotifications] = useState([]);
   const { user } = useAuth();
+  const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 
   useEffect(() => {
     if (!user) return;
 
-    const ws = new WebSocket(`ws://localhost:3000?username=${encodeURIComponent(user.email)}`);
+    const ws = new WebSocket(`${websocketUrl}?username=${encodeURIComponent(user.email)}`);
 
     ws.onopen = () => {
       console.log(`Connected to WebSocket as ${user.email}`);

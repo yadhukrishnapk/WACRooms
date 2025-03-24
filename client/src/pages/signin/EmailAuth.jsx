@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FiMail, FiLock, FiArrowRight, FiAlertCircle } from "react-icons/fi";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import { post } from "../../apiServices/apiServices";
 
 const EmailAuth = ({ onLoginSuccess, onError }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -19,24 +19,18 @@ const EmailAuth = ({ onLoginSuccess, onError }) => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const res = await post("/auth/login", formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      if (res.status === 200 && res.data.user) {
-        onLoginSuccess(res.data.user);
+      if (res.user) {
+        onLoginSuccess(res.user);
       } else {
-        // Handle unusual success responses that don't have user data
         onError("Login successful but user data is missing");
       }
-    } catch (err) {
+    }catch (err) {
       if (err.response) {
         onError(err.response.data.message || "Login failed");
         console.error('Server error:', err.response.data);

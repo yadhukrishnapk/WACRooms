@@ -29,11 +29,11 @@ const AnimatedList = ({
   itemClassName = '',
   displayScrollbar = true,
   initialSelectedIndex = -1,
-  listRef: externalRef, // Accept external ref
-  onScroll, // Accept scroll handler
+  listRef: externalRef, 
+  onScroll, 
 }) => {
   const internalRef = useRef(null);
-  const listRef = externalRef || internalRef; // Use external ref if provided
+  const listRef = externalRef || internalRef; 
   const [selectedIndex, setSelectedIndex] = useState(initialSelectedIndex);
   const [keyboardNav, setKeyboardNav] = useState(false);
   const [topGradientOpacity, setTopGradientOpacity] = useState(0);
@@ -46,7 +46,7 @@ const AnimatedList = ({
     setBottomGradientOpacity(
       scrollHeight <= clientHeight ? 0 : Math.min(bottomDistance / 50, 1)
     );
-    if (onScroll) onScroll(e); // Call external scroll handler
+    if (onScroll) onScroll(e); 
   };
 
   useEffect(() => {

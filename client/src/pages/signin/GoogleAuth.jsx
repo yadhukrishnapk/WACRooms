@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import { post } from "../../apiServices/apiServices";
 
 const GoogleAuth = ({ onLoginSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
@@ -10,7 +11,8 @@ const GoogleAuth = ({ onLoginSuccess, onError }) => {
     onSuccess: async (tokenResponse) => {
       try {
         setLoading(true);
-                const userInfoResponse = await axios.get(
+        // Keep axios for external Google API call
+        const userInfoResponse = await axios.get(
           "https://www.googleapis.com/oauth2/v1/userinfo",
           {
             headers: {
@@ -19,23 +21,23 @@ const GoogleAuth = ({ onLoginSuccess, onError }) => {
             },
           }
         );
-        const backendRes = await axios.post(
-          "http://localhost:3000/api/auth/google-login",
+        
+        // Use apiServices for backend call
+        const backendRes = await post("/auth/google-login", 
           { googleUser: userInfoResponse.data },
-          { 
-            withCredentials: true,
+          {
             headers: {
               'Content-Type': 'application/json',
             }
           }
         );
 
-        if (backendRes.status === 200 && backendRes.data.user) {
-          onLoginSuccess(backendRes.data.user);
+        if (backendRes.user) {
+          onLoginSuccess(backendRes.user);
         } else {
           onError("Google login successful but user data is missing");
         }
-      } catch (err) {
+      }catch (err) {
         if (err.response) {
           onError(err.response.data.message || "Google login failed");
           console.error('Server error during Google login:', err.response.data);
