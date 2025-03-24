@@ -18,6 +18,10 @@ mongoose.connect(process.env.MONGO)
 
 const app = express();
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`Request: ${req.method} ${req.url}`);
+  next();
+});
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
@@ -38,7 +42,16 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/event", eventRouter);
 
-app.use(express.static(path.join(__dirname, 'client','dist')));
+// Serve static files with explicit MIME types
+app.use(express.static(path.join(__dirname, 'client', 'dist'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
