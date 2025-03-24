@@ -7,6 +7,7 @@ import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import eventRouter from './routes/event.route.js';
 import path from 'path';
+import fs from 'fs'; // Add fs for debugging
 
 dotenv.config();
 
@@ -14,10 +15,22 @@ mongoose.connect(process.env.MONGO)
   .then(() => console.log('Connected to MongoDB!!'))
   .catch((error) => console.log(error));
 
-  const __dirname = path.resolve();
+const __dirname = path.resolve();
+console.log('__dirname:', __dirname); // Log base directory
+
+const staticPath = path.join(__dirname, 'client', 'dist');
+console.log('Static path:', staticPath); // Log static path
+if (fs.existsSync(staticPath)) {
+  console.log('client/dist exists');
+  console.log('Files in client/dist:', fs.readdirSync(staticPath));
+} else {
+  console.log('client/dist does NOT exist');
+}
 
 const app = express();
 app.use(express.json());
+
+// Log all requests
 app.use((req, res, next) => {
   console.log(`Request: ${req.method} ${req.url}`);
   next();
@@ -42,8 +55,8 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/event", eventRouter);
 
-// Serve static files with explicit MIME types
-app.use(express.static(path.join(__dirname, 'client', 'dist'), {
+// Serve static files
+app.use(express.static(staticPath, {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
@@ -53,11 +66,16 @@ app.use(express.static(path.join(__dirname, 'client', 'dist'), {
   }
 }));
 
+// Catch-all route for SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
+  console.log('Serving index.html from:', indexPath);
+  res.sendFile(indexPath);
 });
-const server = app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+
+const PORT = process.env.PORT || 3000;
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
 server.on('upgrade', (request, socket, head) => {
