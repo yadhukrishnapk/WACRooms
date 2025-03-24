@@ -38,12 +38,11 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/event", eventRouter);
 
-app.use(express.static(path.join(__dirname, 'client/dist')));
+app.use(express.static(path.join(__dirname, 'client','dist')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client','dist','index.html'));
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
-
 const server = app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
